@@ -7,3 +7,6 @@
 
 # .tfvars files
 *.tfvars
+!lab*.tfvars
+env/lab.tfvars
+

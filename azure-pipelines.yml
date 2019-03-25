@@ -1,0 +1,32 @@
+queue:
+  name: Hosted Ubuntu 1604
+
+variables:
+- group: 'TerraformClient'
+- group: 'TerraformState'
+- name: state-key
+  value: 'jimpaine.azure-terraform-lab.master.tfstate'
+
+steps:
+
+- script: |
+   terraform init \
+       -backend-config="resource_group_name=$(resource-group)" \
+       -backend-config="storage_account_name=$(storage-account)" \
+       -backend-config="container_name=$(container-name)" \
+       -backend-config="key=$(state-key)" \
+       -backend-config="access_key=$(access-key)"
+
+  workingDirectory: ./env
+  displayName: 'Terraform init'
+
+
+- script: |
+   terraform apply -auto-approve \
+       -var="client-id=$(client-id)" \
+       -var="client-secret=$(client-secret)" \
+       -var="subscription-id=$(subscription-id)" \
+       -var="tenant-id=$(tenant-id)"
+
+  workingDirectory: ./env
+  displayName: 'Terraform apply'
