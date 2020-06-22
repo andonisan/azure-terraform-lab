@@ -25,7 +25,7 @@ resource "azurerm_storage_container" "lab" {
 }
 ```
 
-## Step 2 - Next put the values in a key vault.
+## Step 2 - (Optional) Next put the values in a key vault.
 
 ```
 resource "azurerm_key_vault_secret" "storage-account" {

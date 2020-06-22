@@ -80,4 +80,4 @@ terraform apply
 While this shows you can output the outputs of a module what is also great is that it means we can use the outputs from one module as inputs to another, which really lets us get clever with the way we build out abstractions for resources in Azure.
 
 # Next Step
-[4.0 Silently run](../4.0)
+[3.1  VM modules](../3.1)
