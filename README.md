@@ -9,6 +9,24 @@ This session will provider an overview of the different options available for pr
 
 ## Labs
 
+Extra tips:
+
+
+INIT
+```
+terraform init --backend-config=..\..\env\backend.cfg
+```
+
+APPLY
+```
+terraform apply --var-file=..\..\env\azurerm.tfvars
+```
+
+DESTROY
+```
+terraform apply --var-file=..\..\env\azurerm.tfvars
+```
+
 ### Hands on with the basics
 
 - [Pre-reqs](/docs/3.prereqs.md)

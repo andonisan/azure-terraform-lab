@@ -9,4 +9,4 @@
 *.tfvars
 !lab*.tfvars
 env/lab.tfvars
-
+*.cfg

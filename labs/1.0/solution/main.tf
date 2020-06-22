@@ -1,13 +1,6 @@
-provider "azurerm" {
-  version = "2.15.0"
-}
-
-provider "random" {
-  version = "~> 2.1"
-}
 resource "azurerm_resource_group" "lab" {
-  name     = "lab-2-3"
-  location = "northeurope"
+  name     = "lab"
+  location = "westeurope"
 }
 
 resource "random_id" "lab" {

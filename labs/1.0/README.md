@@ -12,7 +12,7 @@ Let's add the AzureRM resource provider of a specific version. To do this add th
 
 ```
 provider "azurerm" {
-  version = "~> 1.30.1"
+  version = "2.15.0"
 }
 ```
 

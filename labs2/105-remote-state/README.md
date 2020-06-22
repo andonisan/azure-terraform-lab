@@ -53,7 +53,7 @@ To run the provider with the service principal we need to update the provider de
 
 ```
 provider "azurerm" {
-  version = "~> 1.30.1"
+  version = "2.15.0"
   subscription_id = "${var.subscription_id}"
   client_id       = "${var.client_id}"
   client_secret   = "${var.client_secret}"

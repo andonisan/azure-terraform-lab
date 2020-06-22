@@ -1,10 +1,3 @@
-provider "azurerm" {
-  version = "~> 1.30.1"
-}
-
-provider "random" {
-  version = "~> 2.1"
-}
 resource "azurerm_resource_group" "lab" {
   name     = "lab-2-0"
   location = "northeurope"
