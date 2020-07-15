@@ -79,7 +79,7 @@ resource "azurerm_subnet" "main" {
 Create a file called 'terraform.tfvars' and add the folowing variables:
 
 ```sh
-lab-2-5   = "lab-2-5"
+prefix   = "lab-2-5"
 location = "westeurope"
 ```
 
