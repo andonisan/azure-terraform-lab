@@ -1,9 +1,9 @@
 provider "azurerm" {
   version = "2.15.0"
   features {
-    
   }
 }
+
 
 provider "random" {
   version = "~> 2.1"
@@ -11,7 +11,7 @@ provider "random" {
 
 resource "random_id" "lab" {
   keepers = {
-    resource_group  = "${var.resource_group_name}"
+    resource_group = "${var.resource_group_name}"
   }
 
   byte_length = 2
@@ -44,6 +44,6 @@ resource "azurerm_function_app" "lab" {
   location                  = "${var.resource_group_location}"
   app_service_plan_id       = "${azurerm_app_service_plan.lab.id}"
   storage_connection_string = "${azurerm_storage_account.lab.primary_connection_string}"
-  
+
   version = "~2"
 }

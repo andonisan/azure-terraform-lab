@@ -37,6 +37,6 @@ resource "azurerm_function_app" "lab" {
   resource_group_name       = "${azurerm_resource_group.lab.name}"
   app_service_plan_id       = "${azurerm_app_service_plan.lab.id}"
   storage_connection_string = "${azurerm_storage_account.lab.primary_connection_string}"
-  
+
   version = "~2"
 }

@@ -79,11 +79,11 @@ resource "azurerm_subnet" "main" {
 Create a file called 'terraform.tfvars' and add the folowing variables:
 
 ```sh
-lab-2-4   = "lab-2-4"
+lab-2-5   = "lab-2-5"
 location = "westeurope"
 ```
 
-> Note: Be sure to add a unique lab-2-4, and an appropriate value for location. Do you know where to find valid 'locations'?
+> Note: Be sure to add a unique lab-2-5, and an appropriate value for location. Do you know where to find valid 'locations'?
 
 ### Run Terraform Workflow
 
@@ -107,7 +107,7 @@ Terraform will perform the following actions:
   + resource "azurerm_resource_group" "main" {
       + id       = (known after apply)
       + location = "westeurope"
-      + name     = "lab-2-4-vm-rg"
+      + name     = "lab-2-5-vm-rg"
     }
 
   # azurerm_subnet.main will be created
@@ -119,9 +119,9 @@ Terraform will perform the following actions:
       + enforce_private_link_endpoint_network_policies = false
       + enforce_private_link_service_network_policies  = false
       + id                                             = (known after apply)
-      + name                                           = "lab-2-4-subnet"
-      + resource_group_name                            = "lab-2-4-vm-rg"
-      + virtual_network_name                           = "lab-2-4-vnet"
+      + name                                           = "lab-2-5-subnet"
+      + resource_group_name                            = "lab-2-5-vm-rg"
+      + virtual_network_name                           = "lab-2-5-vnet"
     }
 
   # azurerm_virtual_network.main will be created
@@ -132,8 +132,8 @@ Terraform will perform the following actions:
       + guid                = (known after apply)
       + id                  = (known after apply)
       + location            = "westeurope"
-      + name                = "lab-2-4-vnet"
-      + resource_group_name = "lab-2-4-vm-rg"
+      + name                = "lab-2-5-vnet"
+      + resource_group_name = "lab-2-5-vm-rg"
       + subnet              = (known after apply)
     }
 
@@ -271,8 +271,8 @@ Running `terraform plan` should contain something like the following:
       + ip_address              = (known after apply)
       + ip_version              = "IPv4"
       + location                = "westeurope"
-      + name                    = "lab-2-4-linux-pubip"
-      + resource_group_name     = "lab-2-4-vm-rg"
+      + name                    = "lab-2-5-linux-pubip"
+      + resource_group_name     = "lab-2-5-vm-rg"
       + sku                     = "Basic"
     }
 

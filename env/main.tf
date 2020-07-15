@@ -1,4 +1,4 @@
 resource "azurerm_resource_group" "lab" {
-  name     = "lab"
+  name     = "rg-asantamaria"
   location = "westeurope"
 }
