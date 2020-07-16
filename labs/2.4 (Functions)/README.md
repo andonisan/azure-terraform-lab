@@ -29,7 +29,7 @@ In main.tf
 
 ```
 resource "azurerm_resource_group" "main" {
-  name     = "lab-2-5-${lower(var.rg_names[1])}-rg"
+  name     = "${local.prefix}-${lower(var.rg_names[1])}-rg"
   location = "westeurope"
 }
 
@@ -45,7 +45,7 @@ terraform apply
 ```
 resource "azurerm_resource_group" "main" {
   count    = length(var.rg_names)
-  name     = "lab-2-5-${lower(var.rg_names[count.index])}-rg"
+  name     = "${local.prefix}-${lower(var.rg_names[count.index])}-rg"
   location = "westeurope"
 }
 ```
@@ -76,8 +76,8 @@ variable "rg_names" {
 
 ```
 resource "azurerm_resource_group" "main" {
-  for_each = var.rg_names_set
-  name     = "lab-2-5-${lower(each.key)}-rg"
+  for_each = var.rg_names
+  name     = "${local.prefix}-${lower(each.key)}-rg"
   location = each.value
 }
 
