@@ -5,9 +5,6 @@ variable "vm_size" {}
 variable "rg_name" {}
 
 
-data 
-
-
 resource "random_password" "password" {
   length           = 16
   special          = true

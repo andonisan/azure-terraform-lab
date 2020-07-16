@@ -18,6 +18,10 @@ variable "rg_names" {
 }
 ```
 
+```
+terraform init
+```
+
 
 ## Step 2 - Resource Group first
 
@@ -29,6 +33,10 @@ resource "azurerm_resource_group" "main" {
   location = "westeurope"
 }
 
+```
+```
+terraform plan
+terraform apply
 ```
 
 ## Step 3 - Each count
@@ -42,6 +50,11 @@ resource "azurerm_resource_group" "main" {
 }
 ```
 
+
+```
+terraform plan
+terraform apply
+```
 
 ## Step 3 - for_each 
 
@@ -69,6 +82,12 @@ resource "azurerm_resource_group" "main" {
 }
 
 ```
+
+```
+terraform plan
+terraform apply
+```
+
 ## Step 4 - if_else 
 
 change in variables to 
@@ -103,6 +122,11 @@ resource "azurerm_management_lock" "read_only" {
   scope      = azurerm_resource_group.main.id
   lock_level = "ReadOnly"
 }
+```
+
+```
+terraform plan
+terraform apply
 ```
 
 Using count and built-in functions to simulate if-else-statements is a bit of a hack, but it’s one that works fairly well, and as you can see from the code, it allows you to conceal lots of complexity from your users so that they get to work with a clean and simple API.
