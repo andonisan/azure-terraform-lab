@@ -16,7 +16,6 @@ resource "kubernetes_pod" "nginx" {
       }
     }
   }
-  depends_on = [local_file.kube]
 }
 
 resource "kubernetes_service" "nginx" {
@@ -34,5 +33,4 @@ resource "kubernetes_service" "nginx" {
 
     type = "LoadBalancer"
   }
-  depends_on = [local_file.kube]
 }

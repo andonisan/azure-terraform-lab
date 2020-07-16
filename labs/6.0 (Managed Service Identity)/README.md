@@ -24,6 +24,7 @@ Currently in Azure, Managed Service Identity is supported by a range or resource
 - App Service
 - Key Vault
 - Azure SQL
+- AKS
 
 For this example we will use Key Vault as this is a good go to for when you want to work with resources that don't support MSI, as you can store say connection string or secrets inside Key Vault then retrieve them through MSI.
 

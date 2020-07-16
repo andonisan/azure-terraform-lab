@@ -9,9 +9,9 @@ def hello_world():
     return """<!DOCTYPE html>
 <html>
 <head>
-    <title>Kittens</title>
+    <title>terraform workshop</title>
 </head>
 <body>
-    <img src="http://placekitten.com/200/300" alt="User Image">
+    <img src="https://www.plainconcepts.com/wp-content/uploads/2019/09/plain-concepts-logo@2x.png" alt="User Image">
 </body>
 </html>"""

@@ -1,3 +1,6 @@
+[![infra as code with Terraform](/docs/images/banner.png)](/README.md)
+
+# Azure Virtual Machine- Provisioners Method 2
 # Using Terraform Provisioner
 
 ## Expected Outcome
@@ -247,10 +250,10 @@ To run the example configuration with provisioners:
         return """<!DOCTYPE html>
     <html>
     <head>
-    <title>terraform workshop</title>
+      <title>terraform workshop</title>
     </head>
     <body>
-    <img src="https://www.plainconcepts.com/wp-content/uploads/2019/09/plain-concepts-logo@2x.png" alt="User Image">
+      <img src="https://www.plainconcepts.com/wp-content/uploads/2019/09/plain-concepts-logo@2x.png" alt="User Image">
     </body>
     </html>"""
     ``` 

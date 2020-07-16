@@ -1,103 +1,177 @@
-# Configuring Kubernetes
+# Azure Virtual Machine Scale Set
 
-So one of the main advantages of using Terraform over ARM is that you can use it to work with a range of providers, rather than mixing and matching ARM templates with bash scripts. We have already been using the random provider to generate unique names for resources but now lets try and create a Kubernetes environment using a range of different providers.
+## Expected Outcome
 
-## Step 1 - Adding the foundations
+In this challenge, you will create a kubernetes cluster, and deploy a service, in this case nginx.
 
-In the /env directory add the following resources to get us started.
+The service to deploy is just an  example of how terraform can be used to manage kubernetes resources just like Azure resources.
 
-- Resource group
-- Random ID
+The resources you will use in this challenge:
 
-You can leave the existing resources as these will get build out by our pipeline, along with the new ones.
+- Resource Group
+- Virtual Network
+- Subnet
+- Azure Kubernetes Service (AKS)
+- Load Balancer (auto generated)
+- Public IP Address (auto generated)
+- kubernetes_pod/kubernetes_service
 
-## Step 2 - Add AKS
+## How to
 
-AKS is Azure managed Kubernetes cluster, this is great in that it takes away a lot of the difficulty of managing kubernetes but what it doesn't allow us to do are things such as:
+### Create the base Terraform Configuration
 
-- Generate the SSH keys for the Linux VMs in the same way the CLI does
-- Create Kubernetes resources like, namespaces, secrets and service accounts.
+Change directory into a folder specific to this challenge.
 
-So lets go a head an add in AKS.
+We will start with a few of the basic resources needed.
+
+Create a `core.tf` file to hold our configuration.
+
+Add the folowing to the file:
+
+```hcl
+resource "azurerm_resource_group" "main" {
+  name     = "${var.prefix}-rg"
+  location = var.location
+}
+
+resource "azurerm_virtual_network" "main" {
+  name                = "${var.prefix}-vnet"
+  address_space       = [var.address_space]
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+}
+
+resource "azurerm_subnet" "main" {
+  name                 = "${var.prefix}-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefix       = var.address_prefix
+}
 
 ```
-resource "azurerm_kubernetes_cluster" "lab" {
-  name                = "cluster${random_id.lab.dec}"
-  location            = "${azurerm_resource_group.lab.location}"
-  resource_group_name = "${azurerm_resource_group.lab.name}"
-  dns_prefix          = "cluster${random_id.lab.dec}"
+### Create kubernetes cluster
 
-  # set the Linux profile details using the ssh key we just generated. 
-  # Not that it should be used to access the VM directly, hence why I don't 
-  # store it in Azure Key Vault
-  linux_profile {
-    admin_username = "clusteradmin"
+Create `kubernetes.tf` and add the following configuration:
 
-    ssh_key {
-      key_data = ""
+```
+
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "${var.prefix}-aks"
+  location            = "${azurerm_resource_group.main.location}"
+  resource_group_name = "${azurerm_resource_group.main.name}"
+  dns_prefix          = "${var.prefix}"
+
+ default_node_pool {
+    name       = "default"
+    node_count = 1
+    type       = "VirtualMachineScaleSets"
+    vm_size    = "Standard_D2_v2"
+
+    vnet_subnet_id = azurerm_subnet.main.id
+  }
+
+}
+
+resource "local_file" "foo" {
+    content  = "${azurerm_kubernetes_cluster.aks.kube_config_raw}"
+    filename = pathexpand("~/.kube/config")
+}
+
+```
+
+
+### Create Variables
+
+Create a file `variables.tf` and add the following configuration:
+
+```
+variable "prefix" {}
+variable "location" {}
+variable "address_space" {}
+variable "address_prefix" {}
+variable "name" {}
+```
+
+### Supply values for variables
+
+Create a file `terraform.tfvars` and fill in the values.  Kubernetes needs this to be able to provision load balancers and infrastructure on the clusters behalf:
+
+```
+prefix="l"
+location="westeurope"
+address_prefix="10.1.0.0/24"
+address_space="10.1.0.0/16"
+
+```
+### Run Terraform Workflow
+
+Run `terraform init` since this is the first time we are running Terraform from this directory.
+
+Run `terraform plan` and validate all resources are being created as desired.
+
+Run `terraform apply` and type `yes` when prompted.
+
+Inspect the infrastructure in the portal.
+
+Change the node count to another number and replan, does it match your expectations?
+
+### Create kubernetes service to test and access
+
+Create `k8s-services.tf` and add the collowing configuration:
+
+```
+
+resource "kubernetes_pod" "nginx" {
+  metadata {
+    name = "nginx-example"
+    labels = {
+      App = "nginx"
     }
   }
 
-  kubernetes_version = "1.13.5"
+  spec {
+    container {
+      image = "nginx:1.7.8"
+      name  = "example"
 
-  agent_pool_profile {
-    name            = "default"
-    count           = 3
-    vm_size         = "Standard_B2s"
-    os_type         = "Linux"
-    os_disk_size_gb = 30
-
-    # Attach the AKS cluster to the subnet within the VNet we have created
-    vnet_subnet_id = "${azurerm_subnet.lab.id}"
-  }
-
-  service_principal {
-    client_id     = "${var.client-id}"
-    client_secret = "${var.client-secret}"
-  }
-
-  network_profile {
-    network_plugin = "azure"
-    dns_service_ip = "10.2.2.254"
-    service_cidr = "10.2.2.0/24"
-    docker_bridge_cidr = "172.17.0.1/16"
-  }
-
-  # Enabled RBAC
-  role_based_access_control {
-    enabled = true
-  }
-}
-```
-
-What you will notice in the ssh key block is that it is currently an empty string, so here comes the first new provider to help us out. Luckily there is a TLS provider which we can add in to generate the keys for us.
-
-```
-# Generate the SSH key that will be used for the Linux account on the worker nodes
-resource "tls_private_key" "lab" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-```
-
-You might also want to update the providers as well, this ensures a maintainer can clearly see which providers and which versions are required.
-
-```
-provider "tls" {
-  version = "~> 1.2"
-}
-```
-
-Now we have a resource which can generate SSH keys for us lets go ahead and set the ssh_key block.
-
-```
-ssh_key {
-      key_data = "${tls_private_key.lab.public_key_openssh}"
+      port {
+        container_port = 80
+      }
     }
+  }
+}
+
+resource "kubernetes_service" "nginx" {
+  metadata {
+    name = "nginx-example"
+  }
+  spec {
+    selector = {
+      App = kubernetes_pod.nginx.metadata[0].labels.App
+    }
+    port {
+      port        = 80
+      target_port = 80
+    }
+
+    type = "LoadBalancer"
+  }
+}
 ```
 
-Push your changes in and lets watch the resource go through.
 
-## Step 3 - Add the Kubernetes resources.
+### Run Terraform Workflow
 
-Take a look through the terraform documentation and see if you can add a new namespace to the cluster. You might want to do it in a new file, call it something like terraform.tf
+Run `terraform init` since this is the first time we are running Terraform from this directory.
+
+Run `terraform plan` and validate all resources are being created as desired.
+
+Run `terraform apply` and type `yes` when prompted.
+
+Inspect the infrastructure in the portal.
+
+Access your nginx service with the IP provided.
+
+### Clean up
+
+When you are done, run `terraform destroy` to remove everything we created.

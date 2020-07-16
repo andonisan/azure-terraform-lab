@@ -73,10 +73,9 @@ resource "azurerm_network_security_rule" "app" {
 
 # Create network interface
 resource "azurerm_network_interface" "nic" {
-  name                      = "${var.prefix}NIC"
-  location                  = var.location
-  resource_group_name       = azurerm_resource_group.rg.name
-  network_security_group_id = azurerm_network_security_group.nsg.id
+  name                = "${var.prefix}NIC"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
 
   ip_configuration {
     name                          = "${var.prefix}NICConfg"

@@ -14,7 +14,7 @@ resource "azurerm_subnet" "main" {
   name                 = "${var.prefix}-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefix       = "10.0.1.0/24"
+  address_prefixes     = ["10.0.1.0/24"]
 }
 
 resource "azurerm_network_interface" "linux" {
@@ -58,6 +58,36 @@ resource "azurerm_virtual_machine" "linux" {
   }
   os_profile_linux_config {
     disable_password_authentication = false
+  }
+
+  provisioner "file" {
+    connection {
+      host     = azurerm_public_ip.linux.fqdn
+      type     = "ssh"
+      user     = var.admin_username
+      password = var.admin_password
+    }
+
+    source      = "hello.py"
+    destination = "hello.py"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      host     = azurerm_public_ip.linux.fqdn
+      type     = "ssh"
+      user     = var.admin_username
+      password = var.admin_password
+    }
+
+    inline = [
+      "python3 -V",
+      "sudo apt update",
+      "sudo apt install -y python3-pip python3-flask",
+      "python3 -m flask --version",
+      "sudo FLASK_APP=hello.py nohup flask run --host=0.0.0.0 --port=8000 &",
+      "sleep 1"
+    ]
   }
 }
 

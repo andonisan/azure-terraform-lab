@@ -25,8 +25,6 @@ The resources you will use in this challenge:
 
 Change directory into a folder specific to this challenge.
 
-For example: `cd ~/TerraformWorkshop/201-kubernetes/`.
-
 We will start with a few of the basic resources needed.
 
 Create a `core.tf` file to hold our configuration.

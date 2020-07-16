@@ -6,7 +6,6 @@
 *.tfstate.*
 
 # .tfvars files
-*.tfvars
-!lab*.tfvars
 env/lab.tfvars
 *.cfg
+env/azurerm.tfvars
