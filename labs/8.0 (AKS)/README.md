@@ -1,5 +1,14 @@
 # Azure Virtual Machine Scale Set
 
+## Needed
+
+Previously we need this labs
+
+4.0
+4.1
+5.0
+5.1 
+
 ## Expected Outcome
 
 In this challenge, you will create a kubernetes cluster, and deploy a service, in this case nginx.
@@ -22,7 +31,7 @@ The resources you will use in this challenge:
 
 Change directory into a folder specific to this challenge.
 
-We will start with a few of the basic resources needed.
+We will start with a few of the basic resources needed in infrastructure.
 
 Create a `core.tf` file to hold our configuration.
 
@@ -49,6 +58,41 @@ resource "azurerm_subnet" "main" {
 }
 
 ```
+
+
+### Create log analytics
+
+Create `loganalytics.tf` and add the following configuration:
+
+```
+
+resource "random_id" "log_analytics_workspace_name_suffix" {
+    byte_length = 8
+}
+
+resource "azurerm_log_analytics_workspace" "loganalytics" {
+    # The WorkSpace name has to be unique across the whole of azure, not just the current subscription/tenant.
+    name                = "${var.log_analytics_workspace_name}-${random_id.log_analytics_workspace_name_suffix.dec}"
+    location            = var.log_analytics_workspace_location
+    resource_group_name = azurerm_resource_group.main.name
+    sku                 = var.log_analytics_workspace_sku
+}
+
+resource "azurerm_log_analytics_solution" "loganalytics" {
+    solution_name         = "ContainerInsights"
+    location              = azurerm_log_analytics_workspace.loganalytics.location
+    resource_group_name   = azurerm_resource_group.main.name
+    workspace_resource_id = azurerm_log_analytics_workspace.loganalytics.id
+    workspace_name        = azurerm_log_analytics_workspace.loganalytics.name
+
+    plan {
+        publisher = "Microsoft"
+        product   = "OMSGallery/ContainerInsights"
+    }
+}
+
+```
+
 ### Create kubernetes cluster
 
 Create `kubernetes.tf` and add the following configuration:
@@ -66,17 +110,21 @@ resource "azurerm_kubernetes_cluster" "aks" {
     node_count = 1
     type       = "VirtualMachineScaleSets"
     vm_size    = "Standard_D2_v2"
-
     vnet_subnet_id = azurerm_subnet.main.id
   }
 
-}
+  service_principal {
+      client_id     = var.client_id
+      client_secret = var.client_secret
+  }
 
-resource "local_file" "foo" {
-    content  = "${azurerm_kubernetes_cluster.aks.kube_config_raw}"
-    filename = pathexpand("~/.kube/config")
+  addon_profile {
+      oms_agent {
+      enabled                    = true
+      log_analytics_workspace_id = azurerm_log_analytics_workspace.loganalytics.id
+      }
+  }
 }
-
 ```
 
 
@@ -85,11 +133,18 @@ resource "local_file" "foo" {
 Create a file `variables.tf` and add the following configuration:
 
 ```
-variable "prefix" {}
-variable "location" {}
-variable "address_space" {}
-variable "address_prefix" {}
-variable "name" {}
+variable prefix {}
+variable location {}
+variable address_space {}
+variable address_prefix {}
+variable log_analytics_workspace_name {}
+variable log_analytics_workspace_location {}
+variable log_analytics_workspace_sku {}
+variable agent_count {}
+
+#######################
+variable client_id {}
+variable client_secret {}
 ```
 
 ### Supply values for variables
@@ -97,12 +152,18 @@ variable "name" {}
 Create a file `terraform.tfvars` and fill in the values.  Kubernetes needs this to be able to provision load balancers and infrastructure on the clusters behalf:
 
 ```
-prefix="l"
-location="westeurope"
-address_prefix="10.1.0.0/24"
-address_space="10.1.0.0/16"
+prefix= "lab-8-0-aks"
+location= "westeurope"
+address_prefix= "10.1.0.0/24"
+address_space= "10.1.0.0/16"
+log_analytics_workspace_name =  "lab80aksLogAnalyticsWorkspaceName"
+log_analytics_workspace_sku = "PerGB2018"
 
 ```
+
+### Create point to site
+
+
 ### Run Terraform Workflow
 
 Run `terraform init` since this is the first time we are running Terraform from this directory.
@@ -114,50 +175,6 @@ Run `terraform apply` and type `yes` when prompted.
 Inspect the infrastructure in the portal.
 
 Change the node count to another number and replan, does it match your expectations?
-
-### Create kubernetes service to test and access
-
-Create `k8s-services.tf` and add the collowing configuration:
-
-```
-
-resource "kubernetes_pod" "nginx" {
-  metadata {
-    name = "nginx-example"
-    labels = {
-      App = "nginx"
-    }
-  }
-
-  spec {
-    container {
-      image = "nginx:1.7.8"
-      name  = "example"
-
-      port {
-        container_port = 80
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "nginx" {
-  metadata {
-    name = "nginx-example"
-  }
-  spec {
-    selector = {
-      App = kubernetes_pod.nginx.metadata[0].labels.App
-    }
-    port {
-      port        = 80
-      target_port = 80
-    }
-
-    type = "LoadBalancer"
-  }
-}
-```
 
 
 ### Run Terraform Workflow

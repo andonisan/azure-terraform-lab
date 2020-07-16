@@ -1,0 +1,34 @@
+trigger:
+  branches:
+    include:
+    - master
+
+variables:
+  - name: subscription
+    value: 'XXXX-DEVOPS'
+  - group: 'Service Principal'
+  
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+  - template: templates/build.yml
+
+- stage: deploy_ci
+  displayName: Deploy ci infrastructure
+  dependsOn: build
+  jobs:
+  - template: templates/deploy.yml
+    parameters:
+      environment: 'CI'
+      workingDirectory: '$(Pipeline.Workspace)/Infrastructure/infrastructure'
+      subscription: '$(subscription)'
+      terraformVariableGroupName: 'Terraform'
+      terraformEnvironmentVariableGroupName: 'Terraform CI'
+      tfstatename: 'ci.tfstate'
+      artifact: 'Infrastructure'
+      terraformVariables: '-var AZURE_CLIENT_SECRET=$(TF_VAR_AZURE_CLIENT_SECRET)
+

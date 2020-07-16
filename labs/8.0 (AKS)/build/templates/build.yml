@@ -1,0 +1,9 @@
+jobs:
+- job: Build
+  steps:
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish infrastructure artifact'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/infrastructure'
+      ArtifactName: 'Infrastructure'
+      publishLocation: 'Container'

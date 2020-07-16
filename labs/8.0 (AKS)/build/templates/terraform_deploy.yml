@@ -1,0 +1,52 @@
+parameters:
+- name: subscription
+  type: string
+- name: tfstatename
+  type: string
+- name: workingDirectory
+  type: string
+- name: terraformVariables
+  type: string
+        
+steps:
+- task: TerraformInstaller@0
+  displayName: Terraform install
+  inputs:
+    terraformVersion: $(TERRAFORM_VERSION)
+
+- task: TerraformCLI@0
+  displayName: Terraform init
+  inputs:
+    command: 'init'
+    workingDirectory: '${{ parameters.workingDirectory }}'
+    backendType: 'azurerm'
+    backendServiceArm: ${{ parameters.subscription }}
+    ensureBackend: false
+    backendAzureRmResourceGroupName: '$(TERRAFORM_STORAGE_ACCOUNT_RESOURCE_GROUP_NAME)'
+    backendAzureRmResourceGroupLocation: '$(TERRAFORM_STORAGE_AZURE_REGION)'
+    backendAzureRmStorageAccountName: '$(TERRAFORM_STORAGE_ACCOUNT_NAME)'
+    backendAzureRmStorageAccountSku: '$(TERRAFORM_STORAGE_SKU)'
+    backendAzureRmContainerName: '$(TERRAFORM_STORAGE_CONTAINER_NAME)'
+    backendAzureRmKey: '${{ parameters.tfstatename }}'
+
+- task: TerraformCLI@0
+  displayName: Terraform plan
+  inputs:
+    command: 'plan'
+    workingDirectory: '${{ parameters.workingDirectory }}'
+    environmentServiceName: ${{ parameters.subscription }}
+    commandOptions: '-detailed-exitcode ${{parameters.terraformVariables}}'
+
+- task: TerraformCLI@0
+  displayName: Terraform apply
+  inputs:
+    command: 'apply'
+    workingDirectory: '${{ parameters.workingDirectory }}'
+    environmentServiceName: ${{ parameters.subscription }}
+    commandOptions: '-auto-approve ${{parameters.terraformVariables}}'
+
+- task: terraform-outputs@0
+  displayName: Terraform variable outputs
+  inputs:
+    workingDirectory: '${{ parameters.workingDirectory }}'
+    mapSensitiveOutputsAsSecrets: false

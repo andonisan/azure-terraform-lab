@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "main" {
-  name = "${var.prefix}-aks-rg"
+  name     = "${var.prefix}-aks-rg"
   location = var.location
 }
 
@@ -14,5 +14,5 @@ resource "azurerm_subnet" "main" {
   name                 = "${var.prefix}-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefix       = var.address_prefix
+  address_prefixes     = [var.address_prefix]
 }
